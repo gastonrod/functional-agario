@@ -2,3 +2,4 @@
 agario.cabal
 *~
 *.swp
+runs/*

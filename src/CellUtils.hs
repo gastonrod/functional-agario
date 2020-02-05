@@ -50,7 +50,6 @@ getVectorFromCellToCell c1 c2 = Vec (x/norm) (y/norm) where
   y = (getY c2) - (getY c1)
   norm = sqrt(x^2 + y^2)
 
-
 doesntOverlapWithAnyCell :: Position -> Radius -> [Cell] -> Bool
 doesntOverlapWithAnyCell pos rad xs = all (doesntOverlapWithCell pos rad) xs
 

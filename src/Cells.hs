@@ -52,6 +52,6 @@ generateCellsR _ 0 _ _ _ xs = xs
 generateCellsR (s1:s2:seeds) noCells bS initRadius createPlayer xs = 
   let newPos = randomPosition s1 s2 bS initRadius in
   if doesntOverlapWithAnyCell newPos initRadius xs then
-    generateCellsR seeds (noCells-1) bS initRadius createPlayer (xs++[generateCell newPos initRadius (fromIntegral(length xs)) createPlayer closestAgent])
+    generateCellsR seeds (noCells-1) bS initRadius createPlayer (xs++[generateCell newPos initRadius (fromIntegral(length xs)) createPlayer planktonFirstGreedy])
   else 
     generateCellsR seeds noCells bS initRadius createPlayer xs

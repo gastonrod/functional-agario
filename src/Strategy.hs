@@ -1,29 +1,69 @@
 module Strategy
 (
-  closestAgent,
+  closestAgentGreedy,
+  planktonFirstGreedy,
+  playerFirstGreedy,
   getStrategy,
 )
 where
 
 import Game
 import CellUtils
+import EatingMechanics
 
 getStrategy :: Cell -> StrategyFunction
-getStrategy (Player _ _ _ st) = closestAgent
-getStrategy (Plankton _ _ _) = closestAgent
+getStrategy (Player _ _ _ st) = st
+getStrategy (Plankton _ _ _) = closestAgentGreedy
 
--- closestAgent player yS kS = minimum (filter (0 /=) (map ((getDistCells player), (yS++kS)))
-closestAgent :: StrategyFunction
-closestAgent player (y:yS) kS = getVectorFromCellToCell player (closestAgentR player randCell (yS++kS))
+-- closestAgentGreedy player yS kS = minimum (filter (0 /=) (map ((getDistCells player), (yS++kS)))
+closestAgentGreedy :: StrategyFunction
+closestAgentGreedy player (y:yS) kS = getVectorFromCellToCell player (closestAgentGreedyR player randCell (yS++kS))
   where randCell = if getID y == getID player then yS!!0 else y
 
-closestAgentR :: Cell -> Cell -> [Cell] -> Cell
-closestAgentR player closestCell [] = closestCell
-closestAgentR player closestCell (x:xs) = 
-  if (getID player /= getID x) && isCloser (getDistCells player closestCell) player x then
-    closestAgentR player x xs
+closestAgentGreedyR :: Cell -> Cell -> [Cell] -> Cell
+closestAgentGreedyR player closestCell [] = closestCell
+closestAgentGreedyR player closestCell (x:xs) = 
+  if (getID player /= getID x) && isCloser closestCell player x && canEat player x then
+    closestAgentGreedyR player x xs
   else
-    closestAgentR player closestCell xs
+    closestAgentGreedyR player closestCell xs
 
-isCloser :: Double -> Cell -> Cell -> Bool
-isCloser prevDist c1 c2 = getDistCells c1 c2 < prevDist 
+isCloser :: Cell -> Cell -> Cell -> Bool
+isCloser c1 c2 c3 = getDistCells c2 c3 < (getDistCells c1 c2)
+isCloserM :: Cell -> Cell -> Cell -> Bool
+isCloserM c1 c2 c3 = getDistCells c2 c3 < (getDistCells c1 c2)
+
+planktonFirstGreedy :: StrategyFunction 
+planktonFirstGreedy player ys [] = closestAgentGreedy player ys []
+planktonFirstGreedy player ys (k:ks) = getVectorFromCellToCell player (planktonFirstGreedyR player k ks)
+
+planktonFirstGreedyR :: Cell -> Cell -> [Cell] -> Cell
+planktonFirstGreedyR player closestK [] = closestK
+planktonFirstGreedyR player closestK (k:ks) = 
+  if isCloser closestK player k then
+    closestAgentGreedyR player k ks
+  else
+    closestAgentGreedyR player closestK ks
+
+
+playerFirstGreedy :: StrategyFunction 
+playerFirstGreedy player ys ks = getVectorFromCellToCell player (playerFirstGreedyR player Nothing  (ys++ks))
+
+playerFirstGreedyR :: Cell -> Maybe Cell -> [Cell] -> Cell
+playerFirstGreedyR player Nothing ((Plankton pos rad id):xs) = planktonFirstGreedyR player (Plankton pos rad id) xs
+playerFirstGreedyR player (Just (Player pos rad id strat)) ((Plankton _ _ _):xs) = player
+playerFirstGreedyR player Nothing ((Player pos rad id f):xs) =
+  if canEat player x then
+    playerFirstGreedyR player (Just x) xs
+  else
+    playerFirstGreedyR player Nothing xs
+  where
+    x = (Player pos rad id f)
+playerFirstGreedyR player (Just (Player pos1 rad1 id1 f1)) ((Player pos2 rad2 id2 f2):xs) =
+  if (getID player /= getID x) && isCloser closestCell player x && canEat player x then
+    playerFirstGreedyR player (Just x) xs
+  else
+    playerFirstGreedyR player (Just closestCell) xs
+  where
+    closestCell = (Player pos1 rad1 id1 f1)
+    x = (Player pos2 rad2 id2 f2)

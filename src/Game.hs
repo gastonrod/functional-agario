@@ -1,6 +1,7 @@
 module Game
 (
   GameContainer(..),
+  GameHistory(..),
   BoardSize,
   Radius,
   NoPlankton, 
@@ -10,6 +11,7 @@ module Game
   CellID,
   StrategyFunction,
   OutputFunction,
+  GameStateToStringFunction,
 --  OutputFunctionToFile,
   Vector(..),
   CreatePlayer,
@@ -20,6 +22,7 @@ module Game
 where
 
 data GameContainer = GC BoardSize [Cell] [Cell] [OutputFunction]
+data GameHistory = GH [[Cell]] [[Cell]]
 data Position = Point Double Double deriving Show
 type BoardSize = Double
 type Radius = Double
@@ -33,8 +36,8 @@ type CreatePlayer = Bool
 
 -- Player -> Players -> Planktons -> Vector
 type StrategyFunction = Cell -> [Cell] -> [Cell] -> Vector
-type OutputFunction = [Cell] -> [Cell] -> String
---type OutputFunctionToFile = FilePath -> OutputFunction
+type OutputFunction = [[Cell]] -> [[Cell]] -> IO ()
+type GameStateToStringFunction = [Cell] -> [Cell] -> String
 
 getPlayers :: GameContainer -> [Cell]
 getPlayers (GC _ players _ _) = players
