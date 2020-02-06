@@ -1,8 +1,7 @@
 module Main where
 
-import Lib
 import Random
-import Game
+import GameDefinitions
 import Cells
 import CellUtils
 import Outputter
@@ -25,10 +24,13 @@ noY = 15
 rY = 1.0
 noK = 200
 rK = 0.5
-outputters = [writeCsvOutputter "./runs/count_2.csv" countPlayersAndPlanktonInState countPlayersAndPlanktonInStateHeader,writeFileOutputter "./runs/r2.xyz" stateToXyzFormat]
+--outputters = [writeCsvOutputter "./runs/count_2.csv" countPlayersAndPlanktonInState countPlayersAndPlanktonInStateHeader,writeFileOutputter "./runs/r3.xyz" stateToXyzFormat]
+outputters = [writeFileOutputter "./runs/r4.xyz" stateToXyzFormat]
 gc = (GC boardSize players planktons outputters)
 
-main :: IO [()]
+--main :: IO [()]
+--main = do
+  --startSimulation s1 s2 boardSize noY rY noK rK  outputters
+main :: IO ()
 main = do
-  startSimulation s1 s2 boardSize noY rY noK rK  outputters
-  --runGame gc (GH [players] [planktons])
+  frunGame gc (GH [players] [planktons])
