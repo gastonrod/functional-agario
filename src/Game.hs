@@ -1,4 +1,4 @@
-module GameDefinitions
+module Game
 (
   GameContainer(..),
   GameHistory(..),
@@ -12,6 +12,7 @@ module GameDefinitions
   StrategyFunction,
   OutputFunction,
   GameStateToStringFunction,
+--  OutputFunctionToFile,
   Vector(..),
   CreatePlayer,
   getPlayers,
@@ -20,10 +21,8 @@ module GameDefinitions
 )
 where
 
-type Players   = [Cell]
-type Planktons = [Cell]
-data GameContainer = GC BoardSize Players Planktons [OutputFunction]
-data GameHistory = GH [Players] [Planktons]
+data GameContainer = GC BoardSize [Cell] [Cell] [OutputFunction]
+data GameHistory = GH [[Cell]] [[Cell]]
 data Position = Point Double Double deriving Show
 type BoardSize = Double
 type Radius = Double
@@ -35,15 +34,14 @@ type CellID = Int
 data Vector = Vec Double Double deriving Show
 type CreatePlayer = Bool
 
-type StrategyFunction = Cell -> Players -> Planktons -> Vector
-type OutputFunction = [Players] -> [Planktons] -> IO ()
-type GameStateToStringFunction = Players -> Planktons -> String
+-- Player -> Players -> Planktons -> Vector
+type StrategyFunction = Cell -> [Cell] -> [Cell] -> Vector
+type OutputFunction = [[Cell]] -> [[Cell]] -> IO ()
+type GameStateToStringFunction = [Cell] -> [Cell] -> String
 
-getPlayers :: GameContainer -> Players
+getPlayers :: GameContainer -> [Cell]
 getPlayers (GC _ players _ _) = players
-
-getPlanktons :: GameContainer -> Planktons
+getPlanktons :: GameContainer -> [Cell]
 getPlanktons (GC _ _ planktons _) = planktons
-
 getOutputters :: GameContainer -> [OutputFunction]
 getOutputters (GC _ _ _ outputters) = outputters

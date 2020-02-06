@@ -6,26 +6,17 @@ module EatingMechanics (
   playersEatPlanktonsReturnPlanktons,
   playersEatPlanktonsReturnPlayers,
   checkIfPlanktonIsEaten,
-  processOverlappingCells,
 ) where
 
-import GameDefinitions
+import Game
 import Data.Maybe
 import CellUtils
-
-processOverlappingCells :: BoardSize -> [Cell] -> [Cell] -> [OutputFunction] -> GameContainer
-processOverlappingCells bs players planktons os = (GC bs playersAfterEatingIsDone planktonsAfterEatingIsDone os)
-  where
-    playersAfterEatingPlayers  = playersEatPlayers players
-    playersAfterEatingIsDone   = playersEatPlanktonsReturnPlayers playersAfterEatingPlayers planktons
-    planktonsAfterEatingIsDone = playersEatPlanktonsReturnPlanktons playersAfterEatingPlayers planktons
-
 
 canEat :: Cell -> Cell -> Bool
 canEat c1 c2 = getRad c1 > (getRad c2) * 1.1
 
 isEating :: Cell -> Cell -> Bool
-isEating player cell = cellOverlapsWithCell player cell && canEat player cell
+isEating player cell = cellOverlapsWithCell player cell && (getRad player > ((getRad cell) * 1.1))
 
 consume :: Cell -> Cell -> Cell
 consume (Player pos rad id strat) victim = (Player pos (sqrt(rad*rad+(getRad victim)*(getRad victim))) id strat)
