@@ -66,11 +66,6 @@ checkIfPlanktonIsEaten (x:xs) plankton =
     consume x plankton
   else
     checkIfPlanktonIsEaten xs plankton
-{-
-f :: (a -> a -> Bool) -> [a] -> a -> a
-f g [] a = a
-f g (x:xs) a = if g x a then x else f g xs a
--}
 
 playersEatPlayers :: Players -> Players
 playersEatPlayers players = playersEatR players players []

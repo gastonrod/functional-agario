@@ -19,14 +19,14 @@ randomPosition s1 s2 boardSize cellRadius = Point x y
     x = randDoubleInRange s1 cellRadius (boardSize-cellRadius)
     y = randDoubleInRange s2 cellRadius (boardSize-cellRadius)
 
-generateCells :: Seed -> Integer -> BoardSize -> Radius -> Bool -> [Cell] -> [Cell]
-generateCells seed noCells bS initRadius createPlayer existingCells = generateCellsR (randomSeeds seed) noCells bS initRadius createPlayer existingCells
+generateCells :: Seed -> Integer -> BoardSize -> Radius -> Bool -> [Cell] -> StrategyFunction -> [Cell]
+generateCells seed noCells bS initRadius createPlayer existingCells stFn = generateCellsR (randomSeeds seed) noCells bS initRadius createPlayer existingCells stFn
 
-generateCellsR :: [Seed] -> Integer -> BoardSize -> Radius -> CreatePlayer -> [Cell] -> [Cell]
-generateCellsR _ 0 _ _ _ xs = xs
-generateCellsR (s1:s2:seeds) noCells bS initRadius createPlayer xs = 
+generateCellsR :: [Seed] -> Integer -> BoardSize -> Radius -> CreatePlayer -> [Cell] -> StrategyFunction -> [Cell]
+generateCellsR _ 0 _ _ _ xs _ = xs
+generateCellsR (s1:s2:seeds) noCells bS initRadius createPlayer xs stFn = 
   let newPos = randomPosition s1 s2 bS initRadius in
   if doesntOverlapWithAnyCell newPos initRadius xs then
-    generateCellsR seeds (noCells-1) bS initRadius createPlayer (xs++[generateCell newPos initRadius (fromIntegral(length xs)) createPlayer planktonFirstGreedy])
+    generateCellsR seeds (noCells-1) bS initRadius createPlayer (xs++[generateCell newPos initRadius (fromIntegral(length xs)) createPlayer stFn]) stFn
   else 
-    generateCellsR seeds noCells bS initRadius createPlayer xs
+    generateCellsR seeds noCells bS initRadius createPlayer xs stFn

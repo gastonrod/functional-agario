@@ -24,6 +24,9 @@ module GameDefinitions
 )
 where
 
+data Cell = 
+  Player Position Radius Integer StrategyFunction |
+  Plankton Position Radius Integer
 type Players   = [Cell]
 type Planktons = [Cell]
 type GameState = (Players, Planktons)
@@ -35,7 +38,6 @@ type Radius = Double
 type NoPlankton = Integer
 type NoPlayer = Integer
 type CellType = Integer
-data Cell = Player Position Radius Integer StrategyFunction | Plankton Position Radius Integer
 type CellID = Int
 data Vector = Vec Double Double deriving Show
 type CreatePlayer = Bool
