@@ -21,19 +21,19 @@ writeFileOutputter filePath fn = (\y -> \k -> writeFile filePath (concatenateWho
 
 concatenateWholeGameState :: GameStateToStringFunction -> [Players] -> [Planktons] -> String
 concatenateWholeGameState f [] [] = ""
-concatenateWholeGameState f (y:ys) (k:ks) =  f y k ++ concatenateWholeGameState f ys ks
+concatenateWholeGameState f (y:ys) (k:ks) =  f (y, k) ++ concatenateWholeGameState f ys ks
 
 countPlayersAndPlanktonInStateHeader = "players,planktons\n"
 countPlayersAndPlanktonInState :: GameStateToStringFunction
-countPlayersAndPlanktonInState [] [] = ""
-countPlayersAndPlanktonInState ys ks = show (length ys) ++ "," ++ show (length ks) ++ "\n"
+countPlayersAndPlanktonInState ([], []) = ""
+countPlayersAndPlanktonInState (ys, ks) = show (length ys) ++ "," ++ show (length ks) ++ "\n"
 
 stateToXyzFormat :: GameStateToStringFunction
-stateToXyzFormat [] [] = ""
-stateToXyzFormat ys ks = (show (length ys+length ks) ++ "\n" ++ (id foldl (++) "" (cellsInXyz ys ks)) ++ "\n")
+stateToXyzFormat ([], []) = ""
+stateToXyzFormat (ys, ks) = (show (length ys+length ks) ++ "\n" ++ (id foldl (++) "" (cellsInXyz (ys, ks)) ++ "\n"))
 
-cellsInXyz :: Players -> Planktons -> [String]
-cellsInXyz ys ks = map cellToXyzFormat ys ++ map cellToXyzFormat ks 
+cellsInXyz :: GameState -> [String]
+cellsInXyz (ys, ks) = map cellToXyzFormat ys ++ map cellToXyzFormat ks 
 
 cellToXyzFormat :: Cell -> String
 cellToXyzFormat (Player (Point x y) rad id _) = "\n1 " ++ show x ++ " " ++ show y ++ " 1 " ++ show rad ++ " " ++ show id ++ " 255 0 0"

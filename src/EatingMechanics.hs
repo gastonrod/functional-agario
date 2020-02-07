@@ -14,12 +14,12 @@ import GameDefinitions
 import Data.Maybe
 import CellUtils
 
-processOverlappingCells :: BoardSize -> Players -> Planktons -> [OutputFunction] -> GameContainer
-processOverlappingCells bs players planktons os = (GC bs playersAfterEatingIsDone planktonsAfterEatingIsDone os)
+processOverlappingCells :: BoardSize -> GameState -> [OutputFunction] -> GameContainer
+processOverlappingCells bs (players, planktons) os = (GC bs playersAfterEatingIsDone planktonsAfterEatingIsDone os)
   where
     playersAfterEatingPlayers  = playersEatPlayers players
-    playersAfterEatingIsDone   = playersEatPlanktonsReturnPlayers playersAfterEatingPlayers planktons
-    planktonsAfterEatingIsDone = playersEatPlanktonsReturnPlanktons playersAfterEatingPlayers planktons
+    playersAfterEatingIsDone   = playersEatPlanktonsReturnPlayers (playersAfterEatingPlayers, planktons)
+    planktonsAfterEatingIsDone = playersEatPlanktonsReturnPlanktons (playersAfterEatingPlayers, planktons)
 
 playersCantEatEachOther :: Players -> Bool
 playersCantEatEachOther ys = any (\y -> any (canEat y) ys ) ys
@@ -33,29 +33,29 @@ isEating player cell = cellOverlapsWithCell player cell && canEat player cell
 consume :: Cell -> Cell -> Cell
 consume (Player pos rad id strat) victim = (Player pos (sqrt(rad*rad+(getRad victim)*(getRad victim))) id strat)
 
-playersEatPlanktonsReturnPlayers :: Players -> Planktons -> Players
-playersEatPlanktonsReturnPlayers ys ks = playersEatPlanktonsReturnPlayersR ys ks []
+playersEatPlanktonsReturnPlayers :: GameState -> Players
+playersEatPlanktonsReturnPlayers (ys, ks) = playersEatPlanktonsReturnPlayersR (ys, ks) []
 
-playersEatPlanktonsReturnPlayersR :: Players -> Planktons -> Players -> Players
-playersEatPlanktonsReturnPlayersR players [] _ = players
-playersEatPlanktonsReturnPlayersR allPlayers (k:planktons) _ =
+playersEatPlanktonsReturnPlayersR :: GameState -> Players -> Players
+playersEatPlanktonsReturnPlayersR (players, []) _ = players
+playersEatPlanktonsReturnPlayersR (allPlayers, (k:planktons)) _ =
   if isPlayer planktonIfNotEaten then
-    playersEatPlanktonsReturnPlayersR (replaceCell allPlayers planktonIfNotEaten) planktons []
+    playersEatPlanktonsReturnPlayersR ((replaceCell allPlayers planktonIfNotEaten), planktons) []
   else
-    playersEatPlanktonsReturnPlayersR allPlayers planktons []
+    playersEatPlanktonsReturnPlayersR (allPlayers, planktons) []
   where
     planktonIfNotEaten = checkIfPlanktonIsEaten allPlayers k
 
-playersEatPlanktonsReturnPlanktons :: Players -> Planktons -> Players
-playersEatPlanktonsReturnPlanktons ys ks = playersEatPlanktonsReturnPlanktonsR ys ks []
+playersEatPlanktonsReturnPlanktons :: GameState -> Players
+playersEatPlanktonsReturnPlanktons (ys, ks) = playersEatPlanktonsReturnPlanktonsR (ys, ks) []
 
-playersEatPlanktonsReturnPlanktonsR :: Players -> Planktons -> Players -> Planktons
-playersEatPlanktonsReturnPlanktonsR _ [] survivingPlanktons = survivingPlanktons
-playersEatPlanktonsReturnPlanktonsR allPlayers (k:planktons) survivingPlanktons =
+playersEatPlanktonsReturnPlanktonsR :: GameState -> Players -> Planktons
+playersEatPlanktonsReturnPlanktonsR (_, []) survivingPlanktons = survivingPlanktons
+playersEatPlanktonsReturnPlanktonsR (allPlayers, (k:planktons)) survivingPlanktons =
   if isPlayer planktonIfNotEaten then
-    playersEatPlanktonsReturnPlanktonsR allPlayers planktons survivingPlanktons
+    playersEatPlanktonsReturnPlanktonsR (allPlayers, planktons) survivingPlanktons
   else
-    playersEatPlanktonsReturnPlanktonsR allPlayers planktons (planktonIfNotEaten:survivingPlanktons)
+    playersEatPlanktonsReturnPlanktonsR (allPlayers, planktons) (planktonIfNotEaten:survivingPlanktons)
   where
     planktonIfNotEaten = checkIfPlanktonIsEaten allPlayers k
 

@@ -24,7 +24,7 @@ import EatingMechanics
   6) Revisar la condición de equilibrio para determinar si el juego terminó
 -}
 
-startSimulation :: Seed -> Seed -> BoardSize -> NoPlayer -> Radius -> NoPlankton -> Radius -> [OutputFunction] -> IO [()]
+startSimulation :: Seed -> Seed -> BoardSize -> NoPlayer -> Radius -> NoPlankton -> Radius -> [OutputFunction] -> MainReturnType
 startSimulation s1 s2 bS noY rY noK rK outputters = runGame (GC bS players planktons outputters) (GH [players] [planktons])
   where
     players   = generateCells s1 noY bS rY True []
@@ -32,8 +32,8 @@ startSimulation s1 s2 bS noY rY noK rK outputters = runGame (GC bS players plank
 
 runGame :: GameContainer -> GameHistory -> IO [()]
 runGame (GC bS players planktons os) (GH playersHistory planktonsHistory) = do 
-  let playersAfterMoving = movePlayers players planktons bS
-  let newGC = processOverlappingCells bS playersAfterMoving planktons os
+  let playersAfterMoving = movePlayers (players, planktons) bS
+  let newGC = processOverlappingCells bS (playersAfterMoving, planktons) os
   if equilibriumReached newGC then
     (mapM (callOutputter (playersHistory++[getPlayers newGC]) (planktonsHistory++[getPlanktons newGC])) os)
   else
@@ -44,14 +44,14 @@ runGame (GC bS players planktons os) (GH playersHistory planktonsHistory) = do
 equilibriumReached :: GameContainer -> Bool
 equilibriumReached gc = length (getPlayers gc) == 1 || (length (getPlanktons gc) == 0 && not(playersCantEatEachOther (getPlayers gc)))
 
-movePlayers :: Players -> Planktons ->  BoardSize -> Players
-movePlayers players planktons bS = playersAfterMoving
+movePlayers :: GameState ->  BoardSize -> Players
+movePlayers (players, planktons) bS = playersAfterMoving
   where
-    newVelocities = applyStrategies players planktons
+    newVelocities = applyStrategies (players,planktons)
     playersAfterMoving = applyNewVelocities bS players newVelocities
 
-applyStrategies :: Players -> Planktons -> [Vector]
-applyStrategies players planktons = map (\x -> (getStrategy x) x players planktons) players 
+applyStrategies :: GameState -> [Vector]
+applyStrategies (players, planktons) = map (\x -> (getStrategy x) x (players,planktons)) players 
 
 callOutputter :: [Players] -> [Planktons] -> OutputFunction -> IO ()
 callOutputter ys ks fn = fn ys ks

@@ -31,7 +31,7 @@ outputters = [
   ]
 gc = (GC boardSize players planktons outputters)
 
-main :: IO [()]
+main :: MainReturnType
 main = do
   startSimulation s1 s2 boardSize noY rY noK rK  outputters
 --  runGame gc (GH [players] [planktons])
