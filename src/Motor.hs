@@ -25,19 +25,19 @@ import EatingMechanics
 -}
 
 startSimulation :: Seed -> Seed -> BoardSize -> NoPlayer -> Radius -> NoPlankton -> Radius -> [OutputFunction] -> MainReturnType
-startSimulation s1 s2 bS noY rY noK rK outputters = runGame (GC bS players planktons outputters) (GH [players] [planktons])
+startSimulation s1 s2 bS noY rY noK rK outputters = runGame (GC bS players planktons outputters) ([players], [planktons])
   where
     players   = generateCells s1 noY bS rY True []
     planktons = generateCells s2 noK bS rK False players
 
 runGame :: GameContainer -> GameHistory -> IO [()]
-runGame (GC bS players planktons os) (GH playersHistory planktonsHistory) = do 
+runGame (GC bS players planktons os) (playersHistory, planktonsHistory) = do 
   let playersAfterMoving = movePlayers (players, planktons) bS
   let newGC = processOverlappingCells bS (playersAfterMoving, planktons) os
   if equilibriumReached newGC then
-    (mapM (callOutputter (playersHistory++[getPlayers newGC]) (planktonsHistory++[getPlanktons newGC])) os)
+    (mapM (callOutputter ((playersHistory++[getPlayers newGC]), (planktonsHistory++[getPlanktons newGC]))) os)
   else
-    runGame newGC (GH (playersHistory++[getPlayers newGC]) (planktonsHistory++[getPlanktons newGC])) 
+    runGame newGC ((playersHistory++[getPlayers newGC]), (planktonsHistory++[getPlanktons newGC])) 
 
 
   
@@ -53,5 +53,5 @@ movePlayers (players, planktons) bS = playersAfterMoving
 applyStrategies :: GameState -> [Vector]
 applyStrategies (players, planktons) = map (\x -> (getStrategy x) x (players,planktons)) players 
 
-callOutputter :: [Players] -> [Planktons] -> OutputFunction -> IO ()
-callOutputter ys ks fn = fn ys ks
+callOutputter :: GameHistory -> OutputFunction -> IO ()
+callOutputter gh fn = fn gh

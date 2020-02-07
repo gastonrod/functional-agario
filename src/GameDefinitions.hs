@@ -27,8 +27,8 @@ where
 type Players   = [Cell]
 type Planktons = [Cell]
 type GameState = (Players, Planktons)
+type GameHistory = ([Players], [Planktons])
 data GameContainer = GC BoardSize Players Planktons [OutputFunction]
-data GameHistory = GH [Players] [Planktons]
 data Position = Point Double Double deriving Show
 type BoardSize = Double
 type Radius = Double
@@ -42,7 +42,7 @@ type CreatePlayer = Bool
 type MainReturnType = IO [()]
 
 type StrategyFunction = Cell -> GameState -> Vector
-type OutputFunction = [Players] -> [Planktons] -> IO ()
+type OutputFunction = GameHistory -> IO ()
 type GameStateToStringFunction = GameState -> String
 
 getPlayers :: GameContainer -> Players

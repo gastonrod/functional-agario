@@ -11,17 +11,17 @@ where
 import GameDefinitions
 
 writeCsvOutputter :: String -> GameStateToStringFunction -> String -> OutputFunction
-writeCsvOutputter filePath fn header = (\y -> \k -> writeFile filePath (concatenateWholeGameStateWithHeader header fn y k))
+writeCsvOutputter filePath fn header = (\gh -> writeFile filePath (concatenateWholeGameStateWithHeader header fn gh))
 
-concatenateWholeGameStateWithHeader :: String -> GameStateToStringFunction -> [Players] -> [Planktons] -> String
-concatenateWholeGameStateWithHeader  header f ys ks = header ++ concatenateWholeGameState f ys ks
+concatenateWholeGameStateWithHeader :: String -> GameStateToStringFunction -> GameHistory -> String
+concatenateWholeGameStateWithHeader  header f gh = header ++ concatenateWholeGameState f gh
 
 writeFileOutputter :: String -> GameStateToStringFunction -> OutputFunction
-writeFileOutputter filePath fn = (\y -> \k -> writeFile filePath (concatenateWholeGameState fn y k))
+writeFileOutputter filePath fn = (\gh -> writeFile filePath (concatenateWholeGameState fn gh))
 
-concatenateWholeGameState :: GameStateToStringFunction -> [Players] -> [Planktons] -> String
-concatenateWholeGameState f [] [] = ""
-concatenateWholeGameState f (y:ys) (k:ks) =  f (y, k) ++ concatenateWholeGameState f ys ks
+concatenateWholeGameState :: GameStateToStringFunction -> GameHistory -> String
+concatenateWholeGameState f ([], []) = ""
+concatenateWholeGameState f ((y:ys), (k:ks)) =  f (y, k) ++ concatenateWholeGameState f (ys, ks)
 
 countPlayersAndPlanktonInStateHeader = "players,planktons\n"
 countPlayersAndPlanktonInState :: GameStateToStringFunction
